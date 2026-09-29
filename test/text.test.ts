@@ -50,6 +50,14 @@ describe('rankItems', () => {
   it('khớp ở tiêu đề xếp trước khớp ở mô tả', () => {
     expect(rankItems(items, 'thue', { fields }).map((i) => i.t)).toEqual(['Thuế cư trú', 'Lương tối thiểu']);
   });
+  it('trong cùng trường, khớp nguyên cụm đứng trước khớp rời từng từ', () => {
+    const tools = [{ t: 'Tự Động Hóa & Mapping Excel' }, { t: 'Lấy Hóa Đơn XML' }];
+    expect(rankItems(tools, 'hoa don', { fields: [(i) => i.t] }).map((i) => i.t)).toEqual([
+      'Lấy Hóa Đơn XML',
+      'Tự Động Hóa & Mapping Excel',
+    ]);
+  });
+
   it('keepOrder giữ thứ tự gốc', () => {
     expect(rankItems(items, 'thue', { fields, keepOrder: true }).map((i) => i.t)).toEqual([
       'Lương tối thiểu',

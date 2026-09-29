@@ -205,12 +205,21 @@ export function rankItems<T>(items: readonly T[], query: unknown, opts: RankOpti
   const q = prepareQuery(query);
   if (!q) return opts.limit ? items.slice(0, opts.limit) : [...items];
 
+  // Hạng: trường ưu tiên cao hơn đứng trước; trong cùng trường, chứa NGUYÊN CỤM
+  // truy vấn đứng trước chỉ chứa đủ từng từ. Không thì "hoa don" xếp "Tự Động
+  // Hóa…" (động → dong chứa "don") ngang "Lấy Hóa Đơn…" và thứ tự gốc quyết định.
+  const phrase = q.hasDiacritics ? q.n : q.folded;
+  const hasPhrase = (text: string) => {
+    const n = normalizeText(text);
+    return (q.hasDiacritics ? n : foldDiacritics(n)).includes(phrase);
+  };
   const scored: Array<{ item: T; rank: number; index: number }> = [];
   items.forEach((item, index) => {
     const texts = opts.fields.map((f) => joinField(f(item)));
     if (!matchesQuery(texts.join(' '), q)) return;
     const whole = texts.findIndex((text) => matchesQuery(text, q));
-    scored.push({ item, rank: whole === -1 ? texts.length : whole, index });
+    const rank = whole === -1 ? texts.length * 2 : whole * 2 + (hasPhrase(texts[whole]) ? 0 : 1);
+    scored.push({ item, rank, index });
   });
 
   if (!opts.keepOrder) scored.sort((a, b) => a.rank - b.rank || a.index - b.index);
