@@ -5,6 +5,7 @@ export const DEFAULT_SUGGEST_LABELS = {
     listbox: 'Gợi ý tìm kiếm',
     empty: (q) => _jsxs(_Fragment, { children: ["Ch\u01B0a th\u1EA5y n\u1ED9i dung kh\u1EDBp \u201C", q, "\u201D."] }),
     seeAll: (q) => (_jsxs(_Fragment, { children: ["Xem t\u1EA5t c\u1EA3 k\u1EBFt qu\u1EA3 cho \u201C", _jsx("strong", { children: q }), "\u201D"] })),
+    group: (name) => name,
 };
 function Icon({ icon }) {
     if (!icon)
@@ -25,7 +26,7 @@ export function SearchSuggestPanel({ state, placement = 'stretch', labels, rende
     return (_jsxs("div", { className: `cs-suggest cs-suggest--${placement}`, id: listId, role: "listbox", "aria-label": l.listbox, children: [suggestions.length === 0 && trimmed && _jsx("div", { className: "cs-suggest-empty", children: l.empty(trimmed) }), suggestions.map((item, i) => {
                 const showGroup = item.group && item.group !== suggestions[i - 1]?.group;
                 const isActive = active === i;
-                return (_jsxs("div", { className: "cs-suggest-row", children: [showGroup && (_jsx("div", { className: "cs-suggest-group", "aria-hidden": "true", children: item.group })), _jsx("div", { id: optionId(i), role: "option", "aria-selected": isActive, className: `cs-suggest-item${isActive ? ' is-active' : ''}`, 
+                return (_jsxs("div", { className: "cs-suggest-row", children: [showGroup && (_jsx("div", { className: "cs-suggest-group", "aria-hidden": "true", children: l.group(item.group, suggestions.filter((s) => s.group === item.group)) })), _jsx("div", { id: optionId(i), role: "option", "aria-selected": isActive, className: `cs-suggest-item${isActive ? ' is-active' : ''}`, 
                             // mousedown thay vì click: không để ô nhập mất focus rồi đóng bảng trước khi chọn.
                             onMouseDown: (e) => {
                                 e.preventDefault();

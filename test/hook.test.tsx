@@ -1,5 +1,8 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import { StrictMode } from 'react';
+import { StrictMode, useRef } from 'react';
+import { useSearchBox } from '../src/useSearchBox';
+import { SearchBoxView } from '../src/SearchBox';
+import { SearchSuggestPanel } from '../src/SearchSuggestPanel';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { SearchBox } from '../src/SearchBox';
 import type { SearchItem } from '../src/useSearchBox';
@@ -198,6 +201,73 @@ describe('showOnEmpty', () => {
     const { input } = setup();
     act(() => fireEvent.focus(input));
     expect(screen.queryByRole('listbox')).toBeNull();
+  });
+});
+
+describe('v1.2: bảng lệnh', () => {
+  it('search viết thẳng (mảng mới mỗi render) không xoá dòng đang chọn', () => {
+    render(<SearchBox ariaLabel="I" search={(q) => find(q).slice()} />);
+    const input = screen.getByLabelText('I') as HTMLInputElement;
+    act(() => fireEvent.change(input, { target: { value: 'visa' } }));
+    act(() => fireEvent.keyDown(input, { key: 'ArrowDown' }));
+    expect(input.getAttribute('aria-activedescendant')).toMatch(/-opt-0$/);
+  });
+
+  it('activateFirst: Enter mở ngay dòng đầu', () => {
+    const { type, enter, onChoose } = setup({ activateFirst: true });
+    type('visa');
+    enter();
+    expect(onChoose).toHaveBeenCalledWith(DATA[0]);
+  });
+
+  it('onKeyDown của app chạy trước; preventDefault thì gói bỏ qua', () => {
+    const onKeyDown = vi.fn((e, ctx) => {
+      if (e.key === 'Enter' && e.metaKey) e.preventDefault();
+      return ctx;
+    });
+    const { input, type, key } = setup({ onKeyDown, activateFirst: true });
+    type('visa');
+    key('Enter', { metaKey: true });
+    expect(onKeyDown.mock.calls[0][1]).toEqual({ active: DATA[0], query: 'visa' });
+    key('ArrowDown');
+    expect(input.getAttribute('aria-activedescendant')).toMatch(/-opt-1$/);
+  });
+
+  it('inputAttrs đi xuống <input>', () => {
+    render(<SearchBox ariaLabel="A" search={find} inputAttrs={{ lang: 'ja', enterKeyHint: 'search' }} />);
+    const input = screen.getByLabelText('A');
+    expect(input.getAttribute('lang')).toBe('ja');
+    expect(input.getAttribute('enterkeyhint')).toBe('search');
+  });
+
+  it('hidePanel + bảng đặt chỗ khác + boundaryRef: bấm nút lọc trong hộp không đóng bảng', () => {
+    function Palette() {
+      const dialog = useRef<HTMLDivElement>(null);
+      const state = useSearchBox({ search: find, boundaryRef: dialog });
+      return (
+        <div ref={dialog}>
+          <SearchBoxView state={state} ariaLabel="P" hidePanel />
+          <button type="button">N5</button>
+          {state.showPanel && <SearchSuggestPanel state={state} placement="inline" labels={{ group: (g, items) => `${g} (${items.length})` }} />}
+        </div>
+      );
+    }
+    render(<Palette />);
+    const input = screen.getByLabelText('P') as HTMLInputElement;
+    expect(input.form!.querySelector('[role=listbox]')).toBeNull();
+    act(() => fireEvent.change(input, { target: { value: 'visa' } }));
+    expect(screen.getByRole('listbox')).toBeTruthy();
+    act(() => fireEvent.pointerDown(screen.getByText('N5')));
+    expect(screen.getByRole('listbox')).toBeTruthy();
+    act(() => fireEvent.pointerDown(document.body));
+    expect(screen.queryByRole('listbox')).toBeNull();
+  });
+
+  it('tiêu đề nhóm nhận số mục', () => {
+    const grouped = (q: string) => find(q).map((i) => ({ ...i, group: 'Visa' }));
+    render(<SearchBox ariaLabel="G" search={grouped} labels={{ group: (g, items) => `${g} · ${items.length}` }} />);
+    act(() => fireEvent.change(screen.getByLabelText('G'), { target: { value: 'visa' } }));
+    expect(screen.getByText('Visa · 2')).toBeTruthy();
   });
 });
 

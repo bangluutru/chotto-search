@@ -1,4 +1,4 @@
-import { type ChangeEvent, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
+import { type ChangeEvent, type FormEvent, type KeyboardEvent, type ReactNode, type RefObject } from 'react';
 /** Một dòng gợi ý. Mọi ô tìm kiếm của Chotto trả về đúng dạng này. */
 export interface SearchItem {
     /** Khoá duy nhất trong danh sách. */
@@ -49,6 +49,25 @@ export interface UseSearchBoxOptions<T extends SearchItem = SearchItem> {
      */
     seeAll?: boolean;
     /**
+     * Chọn sẵn dòng đầu mỗi khi danh sách đổi, để Enter mở ngay kết quả đầu
+     * (bảng lệnh). Mặc định không: Enter mà chưa chọn gì là "xem tất cả".
+     */
+    activateFirst?: boolean;
+    /**
+     * Vùng tính là "bên trong" khi bấm chuột. Mặc định là form của ô. Đặt thành
+     * cả hộp thoại khi trong đó có nút lọc hay bảng gợi ý đặt ở chỗ khác — bấm
+     * vào đó không đóng bảng.
+     */
+    boundaryRef?: RefObject<HTMLElement | null>;
+    /**
+     * Phím riêng của app, chạy TRƯỚC xử lý của gói. Gọi `e.preventDefault()` thì
+     * gói bỏ qua phím đó. Ví dụ ⌘/Ctrl+Enter trên dòng `state.active`.
+     */
+    onKeyDown?: (e: KeyboardEvent<HTMLInputElement>, ctx: {
+        active: T | null;
+        query: string;
+    }) => void;
+    /**
      * Đổi giá trị này (thường là pathname) thì ô tự đóng và xoá. Hook không
      * phụ thuộc router nào — mỗi app tự truyền.
      */
@@ -79,15 +98,15 @@ export declare function useSearchBox<T extends SearchItem = SearchItem>(opts?: U
     submit: () => void;
     listId: string;
     optionId: (i: number) => string;
-    containerRef: import("react").RefObject<HTMLFormElement | null>;
-    inputRef: import("react").RefObject<HTMLInputElement | null>;
+    containerRef: RefObject<HTMLFormElement | null>;
+    inputRef: RefObject<HTMLInputElement | null>;
     inputProps: {
         role?: "combobox" | undefined;
         'aria-autocomplete'?: "list" | undefined;
         'aria-expanded'?: boolean | undefined;
         'aria-controls'?: string | undefined;
         'aria-activedescendant'?: string | undefined;
-        ref: import("react").RefObject<HTMLInputElement | null>;
+        ref: RefObject<HTMLInputElement | null>;
         value: string;
         onChange: (e: ChangeEvent<HTMLInputElement>) => void;
         onFocus: () => void;
@@ -98,7 +117,7 @@ export declare function useSearchBox<T extends SearchItem = SearchItem>(opts?: U
         spellCheck: boolean;
     };
     formProps: {
-        ref: import("react").RefObject<HTMLFormElement | null>;
+        ref: RefObject<HTMLFormElement | null>;
         onSubmit: (e: FormEvent<HTMLFormElement>) => void;
         role: "search";
     };

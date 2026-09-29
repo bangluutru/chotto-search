@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, type ReactNode, type Ref } from 'react';
+import { useCallback, type InputHTMLAttributes, type ReactNode, type Ref } from 'react';
 import { useSearchBox, type SearchBoxState, type SearchItem, type UseSearchBoxOptions } from './useSearchBox.js';
 import { SearchSuggestPanel, type PanelPlacement, type SuggestLabels } from './SearchSuggestPanel.js';
 import { ClearGlyph, SearchGlyph } from './SearchGlyph.js';
@@ -37,6 +37,14 @@ export interface SearchBoxViewProps<T extends SearchItem> {
   autoFocus?: boolean;
   id?: string;
   name?: string;
+  /**
+   * Không vẽ bảng gợi ý dưới ô: app tự đặt `<SearchSuggestPanel state={…}>` ở
+   * chỗ khác (cạnh khung xem trước, dưới hàng nút lọc). Nhớ đặt `boundaryRef`
+   * của useSearchBox bao cả chỗ đó.
+   */
+  hidePanel?: boolean;
+  /** Thuộc tính thêm cho <input>: lang, enterKeyHint, autoCapitalize… */
+  inputAttrs?: InputHTMLAttributes<HTMLInputElement>;
 }
 
 function setRef<V>(ref: Ref<V> | undefined, value: V) {
@@ -70,6 +78,8 @@ export function SearchBoxView<T extends SearchItem>({
   autoFocus,
   id,
   name,
+  hidePanel = false,
+  inputAttrs,
 }: SearchBoxViewProps<T>) {
   const l = { ...DEFAULT_LABELS, ...labels };
   const { ref: ownRef, ...inputRest } = state.inputProps;
@@ -87,6 +97,7 @@ export function SearchBoxView<T extends SearchItem>({
       <div className="cs-pill">
         <span className="cs-pill-icon">{icon ?? <SearchGlyph size={size === 'lg' ? 20 : size === 'sm' ? 16 : 18} />}</span>
         <input
+          {...inputAttrs}
           {...inputRest}
           ref={mergedRef}
           type="search"
@@ -123,7 +134,7 @@ export function SearchBoxView<T extends SearchItem>({
           </button>
         )}
       </div>
-      {state.showPanel && (
+      {state.showPanel && !hidePanel && (
         <SearchSuggestPanel
           state={state}
           placement={placement}
@@ -145,8 +156,21 @@ export type SearchBoxProps<T extends SearchItem> = UseSearchBoxOptions<T> &
  *   <SearchBox ariaLabel="Tìm bài viết" search={find} onChoose={(i) => navigate(i.href)} />
  */
 export function SearchBox<T extends SearchItem = SearchItem>(props: SearchBoxProps<T>) {
-  const { mode, search, onChoose, onSubmit, onQueryChange, initialQuery, resetKey, showOnEmpty, seeAll, ...view } =
-    props;
+  const {
+    mode,
+    search,
+    onChoose,
+    onSubmit,
+    onQueryChange,
+    initialQuery,
+    resetKey,
+    showOnEmpty,
+    seeAll,
+    activateFirst,
+    boundaryRef,
+    onKeyDown,
+    ...view
+  } = props;
   const state = useSearchBox<T>({
     mode,
     search,
@@ -157,6 +181,9 @@ export function SearchBox<T extends SearchItem = SearchItem>(props: SearchBoxPro
     resetKey,
     showOnEmpty,
     seeAll: seeAll ?? !view.hideSeeAll,
+    activateFirst,
+    boundaryRef,
+    onKeyDown,
   });
   return <SearchBoxView state={state} {...view} />;
 }

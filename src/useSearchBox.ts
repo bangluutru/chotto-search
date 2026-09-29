@@ -11,6 +11,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
   type ReactNode,
+  type RefObject,
 } from 'react';
 
 /** Một dòng gợi ý. Mọi ô tìm kiếm của Chotto trả về đúng dạng này. */
@@ -65,6 +66,22 @@ export interface UseSearchBoxOptions<T extends SearchItem = SearchItem> {
    */
   seeAll?: boolean;
   /**
+   * Chọn sẵn dòng đầu mỗi khi danh sách đổi, để Enter mở ngay kết quả đầu
+   * (bảng lệnh). Mặc định không: Enter mà chưa chọn gì là "xem tất cả".
+   */
+  activateFirst?: boolean;
+  /**
+   * Vùng tính là "bên trong" khi bấm chuột. Mặc định là form của ô. Đặt thành
+   * cả hộp thoại khi trong đó có nút lọc hay bảng gợi ý đặt ở chỗ khác — bấm
+   * vào đó không đóng bảng.
+   */
+  boundaryRef?: RefObject<HTMLElement | null>;
+  /**
+   * Phím riêng của app, chạy TRƯỚC xử lý của gói. Gọi `e.preventDefault()` thì
+   * gói bỏ qua phím đó. Ví dụ ⌘/Ctrl+Enter trên dòng `state.active`.
+   */
+  onKeyDown?: (e: KeyboardEvent<HTMLInputElement>, ctx: { active: T | null; query: string }) => void;
+  /**
    * Đổi giá trị này (thường là pathname) thì ô tự đóng và xoá. Hook không
    * phụ thuộc router nào — mỗi app tự truyền.
    */
@@ -91,6 +108,8 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
     resetKey,
     showOnEmpty = false,
     seeAll = true,
+    activateFirst = false,
+    boundaryRef,
   } = opts;
 
   const listId = useId();
@@ -105,8 +124,8 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
   const composing = useRef(false);
 
   // Giữ callback mới nhất mà không làm hiệu ứng chạy lại.
-  const cb = useRef({ onChoose, onSubmit, onQueryChange });
-  cb.current = { onChoose, onSubmit, onQueryChange };
+  const cb = useRef({ onChoose, onSubmit, onQueryChange, onKeyDown: opts.onKeyDown });
+  cb.current = { onChoose, onSubmit, onQueryChange, onKeyDown: opts.onKeyDown };
 
   const setQuery = useCallback((value: string) => {
     setQueryState(value);
@@ -126,7 +145,10 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
   const hasSeeAll = seeAll && trimmed.length > 0;
   const optionCount = suggestions.length + (hasSeeAll ? 1 : 0);
 
-  useEffect(() => setActive(-1), [deferred]);
+  // Chỉ đặt lại khi từ khoá đổi, KHÔNG theo `suggestions`: app truyền `search`
+  // viết thẳng trong JSX thì mảng mới mỗi lần render, và ↓ bị xoá ngay sau khi bấm.
+  const hasSuggestions = suggestions.length > 0;
+  useEffect(() => setActive(activateFirst && hasSuggestions ? 0 : -1), [deferred, activateFirst, hasSuggestions]);
 
   // Chuyển trang (resetKey đổi) thì đóng bảng và xoá ô. So với giá trị trước
   // chứ không dùng cờ "lần đầu": StrictMode chạy hiệu ứng hai lần, cờ bị tắt
@@ -149,11 +171,12 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
   useEffect(() => {
     if (!showPanel) return undefined;
     const onPointerDown = (e: PointerEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) close();
+      const inside = boundaryRef?.current ?? containerRef.current;
+      if (inside && !inside.contains(e.target as Node)) close();
     };
     document.addEventListener('pointerdown', onPointerDown);
     return () => document.removeEventListener('pointerdown', onPointerDown);
-  }, [showPanel, close]);
+  }, [showPanel, close, boundaryRef]);
 
   const submit = useCallback(() => {
     if (!trimmed) return;
@@ -184,6 +207,8 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (composing.current || e.nativeEvent.isComposing || e.keyCode === 229) return;
+    cb.current.onKeyDown?.(e, { active: active >= 0 && active < suggestions.length ? suggestions[active] : null, query: trimmed });
+    if (e.defaultPrevented) return;
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       if (mode === 'plain' || (!trimmed && !showOnEmpty) || optionCount === 0) return;
       e.preventDefault();

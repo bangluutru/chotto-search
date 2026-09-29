@@ -12,6 +12,8 @@ export interface SuggestLabels {
   empty?: (query: string) => ReactNode;
   /** Chữ của dòng cuối. */
   seeAll?: (query: string) => ReactNode;
+  /** Tiêu đề nhóm. Nhận tên nhóm và các mục của nhóm đang hiện (để in số đếm…). */
+  group?: (name: string, items: SearchItem[]) => ReactNode;
 }
 
 export const DEFAULT_SUGGEST_LABELS: Required<SuggestLabels> = {
@@ -22,6 +24,7 @@ export const DEFAULT_SUGGEST_LABELS: Required<SuggestLabels> = {
       Xem tất cả kết quả cho “<strong>{q}</strong>”
     </>
   ),
+  group: (name) => name,
 };
 
 export interface SearchSuggestPanelProps<T extends SearchItem> {
@@ -73,7 +76,7 @@ export function SearchSuggestPanel<T extends SearchItem>({
           <div key={item.key} className="cs-suggest-row">
             {showGroup && (
               <div className="cs-suggest-group" aria-hidden="true">
-                {item.group}
+                {l.group(item.group!, suggestions.filter((s) => s.group === item.group))}
               </div>
             )}
             <div

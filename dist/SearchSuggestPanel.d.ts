@@ -8,6 +8,8 @@ export interface SuggestLabels {
     empty?: (query: string) => ReactNode;
     /** Chữ của dòng cuối. */
     seeAll?: (query: string) => ReactNode;
+    /** Tiêu đề nhóm. Nhận tên nhóm và các mục của nhóm đang hiện (để in số đếm…). */
+    group?: (name: string, items: SearchItem[]) => ReactNode;
 }
 export declare const DEFAULT_SUGGEST_LABELS: Required<SuggestLabels>;
 export interface SearchSuggestPanelProps<T extends SearchItem> {

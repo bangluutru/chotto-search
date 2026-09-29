@@ -10,7 +10,7 @@ import { useCallback, useDeferredValue, useEffect, useId, useMemo, useRef, useSt
  * `onSubmit`/`onQueryChange`.
  */
 export function useSearchBox(opts = {}) {
-    const { mode = 'suggest', search, onChoose, onSubmit, onQueryChange, initialQuery = '', resetKey, showOnEmpty = false, seeAll = true, } = opts;
+    const { mode = 'suggest', search, onChoose, onSubmit, onQueryChange, initialQuery = '', resetKey, showOnEmpty = false, seeAll = true, activateFirst = false, boundaryRef, } = opts;
     const listId = useId();
     const containerRef = useRef(null);
     const inputRef = useRef(null);
@@ -21,8 +21,8 @@ export function useSearchBox(opts = {}) {
     // chốt chữ, không phải để tìm.
     const composing = useRef(false);
     // Giữ callback mới nhất mà không làm hiệu ứng chạy lại.
-    const cb = useRef({ onChoose, onSubmit, onQueryChange });
-    cb.current = { onChoose, onSubmit, onQueryChange };
+    const cb = useRef({ onChoose, onSubmit, onQueryChange, onKeyDown: opts.onKeyDown });
+    cb.current = { onChoose, onSubmit, onQueryChange, onKeyDown: opts.onKeyDown };
     const setQuery = useCallback((value) => {
         setQueryState(value);
         cb.current.onQueryChange?.(value);
@@ -36,7 +36,10 @@ export function useSearchBox(opts = {}) {
     // mũi tên. Dòng bị ẩn thì không được tính, không thì ↓ dừng ở một dòng vô hình.
     const hasSeeAll = seeAll && trimmed.length > 0;
     const optionCount = suggestions.length + (hasSeeAll ? 1 : 0);
-    useEffect(() => setActive(-1), [deferred]);
+    // Chỉ đặt lại khi từ khoá đổi, KHÔNG theo `suggestions`: app truyền `search`
+    // viết thẳng trong JSX thì mảng mới mỗi lần render, và ↓ bị xoá ngay sau khi bấm.
+    const hasSuggestions = suggestions.length > 0;
+    useEffect(() => setActive(activateFirst && hasSuggestions ? 0 : -1), [deferred, activateFirst, hasSuggestions]);
     // Chuyển trang (resetKey đổi) thì đóng bảng và xoá ô. So với giá trị trước
     // chứ không dùng cờ "lần đầu": StrictMode chạy hiệu ứng hai lần, cờ bị tắt
     // ở lần một và lần hai xoá mất từ khoá ban đầu (?q= trên trang kết quả).
@@ -58,12 +61,13 @@ export function useSearchBox(opts = {}) {
         if (!showPanel)
             return undefined;
         const onPointerDown = (e) => {
-            if (containerRef.current && !containerRef.current.contains(e.target))
+            const inside = boundaryRef?.current ?? containerRef.current;
+            if (inside && !inside.contains(e.target))
                 close();
         };
         document.addEventListener('pointerdown', onPointerDown);
         return () => document.removeEventListener('pointerdown', onPointerDown);
-    }, [showPanel, close]);
+    }, [showPanel, close, boundaryRef]);
     const submit = useCallback(() => {
         if (!trimmed)
             return;
@@ -94,6 +98,9 @@ export function useSearchBox(opts = {}) {
     }, [close, mode, setQuery]);
     const onKeyDown = (e) => {
         if (composing.current || e.nativeEvent.isComposing || e.keyCode === 229)
+            return;
+        cb.current.onKeyDown?.(e, { active: active >= 0 && active < suggestions.length ? suggestions[active] : null, query: trimmed });
+        if (e.defaultPrevented)
             return;
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
             if (mode === 'plain' || (!trimmed && !showOnEmpty) || optionCount === 0)

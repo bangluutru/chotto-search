@@ -1,4 +1,4 @@
-import { type ReactNode, type Ref } from 'react';
+import { type InputHTMLAttributes, type ReactNode, type Ref } from 'react';
 import { type SearchBoxState, type SearchItem, type UseSearchBoxOptions } from './useSearchBox.js';
 import { type PanelPlacement, type SuggestLabels } from './SearchSuggestPanel.js';
 export interface SearchBoxLabels extends SuggestLabels {
@@ -35,13 +35,21 @@ export interface SearchBoxViewProps<T extends SearchItem> {
     autoFocus?: boolean;
     id?: string;
     name?: string;
+    /**
+     * Không vẽ bảng gợi ý dưới ô: app tự đặt `<SearchSuggestPanel state={…}>` ở
+     * chỗ khác (cạnh khung xem trước, dưới hàng nút lọc). Nhớ đặt `boundaryRef`
+     * của useSearchBox bao cả chỗ đó.
+     */
+    hidePanel?: boolean;
+    /** Thuộc tính thêm cho <input>: lang, enterKeyHint, autoCapitalize… */
+    inputAttrs?: InputHTMLAttributes<HTMLInputElement>;
 }
 /**
  * Giao diện ô tìm kiếm Chotto, điều khiển bằng `state` từ useSearchBox. Hầu
  * hết trang dùng thẳng `<SearchBox>` bên dưới; dùng bản View này khi trang
  * cần giữ state để làm việc khác (chip gợi ý, đọc từ khoá lọc lưới…).
  */
-export declare function SearchBoxView<T extends SearchItem>({ state, ariaLabel, placeholder, labels, size, placement, count, clearable, submitButton, icon, renderItem, hideSeeAll, className, inputRef, autoFocus, id, name, }: SearchBoxViewProps<T>): import("react").JSX.Element;
+export declare function SearchBoxView<T extends SearchItem>({ state, ariaLabel, placeholder, labels, size, placement, count, clearable, submitButton, icon, renderItem, hideSeeAll, className, inputRef, autoFocus, id, name, hidePanel, inputAttrs, }: SearchBoxViewProps<T>): import("react").JSX.Element;
 export type SearchBoxProps<T extends SearchItem> = UseSearchBoxOptions<T> & Omit<SearchBoxViewProps<T>, 'state'>;
 /**
  * Ô tìm kiếm Chotto dùng một dòng:

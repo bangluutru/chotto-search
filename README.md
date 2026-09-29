@@ -30,7 +30,7 @@ những việc đó, có chủ ý, trong `onSubmit`/`onChoose`/`onQueryChange`.
 Repo công khai, `dist/` commit sẵn nên không cần bước build khi cài:
 
 ```bash
-npm install github:bangluutru/chotto-search#v1.1.1
+npm install github:bangluutru/chotto-search#v1.2.0
 ```
 
 Nâng phiên bản: đổi tag trong `package.json` của app.
@@ -82,6 +82,25 @@ Bảng lệnh kiểu ⌘K (mở ra là thấy danh sách): `showOnEmpty` + `plac
 thì ẩn dòng cuối bằng `useSearchBox({ seeAll: false })` — chỉ ẩn ở View thì phím
 ↓ vẫn dừng ở dòng vô hình.
 Nhóm kết quả: đặt `item.group` — bảng tự in tiêu đề khi nhóm đổi.
+
+Bảng lệnh phức tạp (xem trước bên cạnh, nút lọc giữa ô và danh sách):
+
+```jsx
+const dialog = useRef(null);
+const state = useSearchBox({
+  search, showOnEmpty: true, activateFirst: true, seeAll: false,
+  boundaryRef: dialog,              // bấm nút lọc trong hộp không đóng bảng
+  onKeyDown: (e, { active }) => {   // phím riêng, chạy trước gói
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && active) { e.preventDefault(); addToReview(active); }
+  },
+});
+<div ref={dialog}>
+  <SearchBoxView state={state} hidePanel inputAttrs={{ lang: 'ja', enterKeyHint: 'search' }} … />
+  <LevelFilters />
+  <SearchSuggestPanel state={state} placement="inline" labels={{ group: (g, items) => `${g} · ${items.length}` }} />
+  <Preview item={state.suggestions[state.active]} />
+</div>
+```
 
 Chữ giao diện mặc định là tiếng Việt; site ngôn ngữ khác truyền `labels`:
 
