@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
+import { StrictMode } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { SearchBox } from '../src/SearchBox';
 import type { SearchItem } from '../src/useSearchBox';
@@ -156,6 +157,17 @@ describe('resetKey', () => {
     expect(input.value).toBe('visa');
     rerender(<SearchBox ariaLabel="R" search={find} initialQuery="visa" resetKey="/b" />);
     expect(input.value).toBe('');
+  });
+});
+
+describe('StrictMode', () => {
+  it('không xoá initialQuery khi hiệu ứng chạy hai lần', () => {
+    render(
+      <StrictMode>
+        <SearchBox ariaLabel="S" search={find} mode="plain" initialQuery="nenkin" resetKey="/search" />
+      </StrictMode>
+    );
+    expect((screen.getByLabelText('S') as HTMLInputElement).value).toBe('nenkin');
   });
 });
 

@@ -35,13 +35,14 @@ export function useSearchBox(opts = {}) {
     // Dòng cuối "Xem tất cả" cũng chọn được bằng phím mũi tên.
     const optionCount = suggestions.length + 1;
     useEffect(() => setActive(-1), [deferred]);
-    // Chuyển trang (resetKey đổi) thì đóng bảng và xoá ô. Bỏ qua lần đầu.
-    const firstReset = useRef(true);
+    // Chuyển trang (resetKey đổi) thì đóng bảng và xoá ô. So với giá trị trước
+    // chứ không dùng cờ "lần đầu": StrictMode chạy hiệu ứng hai lần, cờ bị tắt
+    // ở lần một và lần hai xoá mất từ khoá ban đầu (?q= trên trang kết quả).
+    const lastResetKey = useRef(resetKey);
     useEffect(() => {
-        if (firstReset.current) {
-            firstReset.current = false;
+        if (Object.is(lastResetKey.current, resetKey))
             return;
-        }
+        lastResetKey.current = resetKey;
         setOpen(false);
         setQuery('');
     }, [resetKey, setQuery]);

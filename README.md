@@ -30,7 +30,7 @@ những việc đó, có chủ ý, trong `onSubmit`/`onChoose`/`onQueryChange`.
 Repo công khai, `dist/` commit sẵn nên không cần bước build khi cài:
 
 ```bash
-npm install github:bangluutru/chotto-search#v1.0.1
+npm install github:bangluutru/chotto-search#v1.0.2
 ```
 
 Nâng phiên bản: đổi tag trong `package.json` của app.

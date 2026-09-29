@@ -114,13 +114,13 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
 
   useEffect(() => setActive(-1), [deferred]);
 
-  // Chuyển trang (resetKey đổi) thì đóng bảng và xoá ô. Bỏ qua lần đầu.
-  const firstReset = useRef(true);
+  // Chuyển trang (resetKey đổi) thì đóng bảng và xoá ô. So với giá trị trước
+  // chứ không dùng cờ "lần đầu": StrictMode chạy hiệu ứng hai lần, cờ bị tắt
+  // ở lần một và lần hai xoá mất từ khoá ban đầu (?q= trên trang kết quả).
+  const lastResetKey = useRef(resetKey);
   useEffect(() => {
-    if (firstReset.current) {
-      firstReset.current = false;
-      return;
-    }
+    if (Object.is(lastResetKey.current, resetKey)) return;
+    lastResetKey.current = resetKey;
     setOpen(false);
     setQuery('');
   }, [resetKey, setQuery]);
