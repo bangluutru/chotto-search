@@ -30,7 +30,7 @@ những việc đó, có chủ ý, trong `onSubmit`/`onChoose`/`onQueryChange`.
 Repo công khai, `dist/` commit sẵn nên không cần bước build khi cài:
 
 ```bash
-npm install github:bangluutru/chotto-search#v1.0.3
+npm install github:bangluutru/chotto-search#v1.0.4
 ```
 
 Nâng phiên bản: đổi tag trong `package.json` của app.
@@ -103,7 +103,8 @@ Map biến `--cs-*` sang token của app, một lần, ở CSS toàn cục:
 Đủ bộ: `--cs-surface`, `--cs-hover`, `--cs-border`, `--cs-text`, `--cs-muted`,
 `--cs-placeholder`, `--cs-accent`, `--cs-focus-ring`, `--cs-shadow`,
 `--cs-panel-shadow`, `--cs-radius-panel`, `--cs-radius-item`, `--cs-button-bg`,
-`--cs-button-bg-hover`, `--cs-button-text`, `--cs-font`, `--cs-height`.
+`--cs-button-bg-hover`, `--cs-button-text`, `--cs-font`, `--cs-font-size`, `--cs-height`.
+Trên máy cảm ứng chữ trong ô luôn ≥ 16px, để iOS Safari không tự phóng to trang.
 Chế độ tối: đổi token của app, các biến ăn theo.
 
 Muốn bỏ bóng thì đặt `--cs-shadow: 0 0 transparent`, **đừng** đặt `none`: gói
