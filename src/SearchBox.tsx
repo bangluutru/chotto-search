@@ -145,7 +145,18 @@ export type SearchBoxProps<T extends SearchItem> = UseSearchBoxOptions<T> &
  *   <SearchBox ariaLabel="Tìm bài viết" search={find} onChoose={(i) => navigate(i.href)} />
  */
 export function SearchBox<T extends SearchItem = SearchItem>(props: SearchBoxProps<T>) {
-  const { mode, search, onChoose, onSubmit, onQueryChange, initialQuery, resetKey, ...view } = props;
-  const state = useSearchBox<T>({ mode, search, onChoose, onSubmit, onQueryChange, initialQuery, resetKey });
+  const { mode, search, onChoose, onSubmit, onQueryChange, initialQuery, resetKey, showOnEmpty, seeAll, ...view } =
+    props;
+  const state = useSearchBox<T>({
+    mode,
+    search,
+    onChoose,
+    onSubmit,
+    onQueryChange,
+    initialQuery,
+    resetKey,
+    showOnEmpty,
+    seeAll: seeAll ?? !view.hideSeeAll,
+  });
   return <SearchBoxView state={state} {...view} />;
 }

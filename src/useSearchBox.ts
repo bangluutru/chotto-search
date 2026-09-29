@@ -55,6 +55,16 @@ export interface UseSearchBoxOptions<T extends SearchItem = SearchItem> {
   /** Từ khoá ban đầu (ví dụ đọc từ `?q=` khi vừa mở trang). */
   initialQuery?: string;
   /**
+   * Hiện bảng gợi ý cả khi ô còn trống (bảng lệnh ⌘K: mở ra là thấy danh
+   * sách). Khi đó `search` được gọi với chuỗi rỗng.
+   */
+  showOnEmpty?: boolean;
+  /**
+   * Có dòng cuối "Xem tất cả" không. Mặc định có. Tắt thì phím ↑/↓ cũng không
+   * dừng ở dòng đó nữa (SearchBox tự tắt khi có `hideSeeAll`).
+   */
+  seeAll?: boolean;
+  /**
    * Đổi giá trị này (thường là pathname) thì ô tự đóng và xoá. Hook không
    * phụ thuộc router nào — mỗi app tự truyền.
    */
@@ -79,6 +89,8 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
     onQueryChange,
     initialQuery = '',
     resetKey,
+    showOnEmpty = false,
+    seeAll = true,
   } = opts;
 
   const listId = useId();
@@ -105,12 +117,14 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
   // Gõ nhanh thì React bỏ qua các lần tính giữa chừng; ô nhập không khựng.
   const deferred = useDeferredValue(trimmed);
   const suggestions = useMemo<T[]>(
-    () => (mode !== 'plain' && deferred && search ? search(deferred) : []),
-    [mode, deferred, search]
+    () => (mode !== 'plain' && search && (deferred || showOnEmpty) ? search(deferred) : []),
+    [mode, deferred, search, showOnEmpty]
   );
-  const showPanel = mode !== 'plain' && open && trimmed.length > 0;
-  // Dòng cuối "Xem tất cả" cũng chọn được bằng phím mũi tên.
-  const optionCount = suggestions.length + 1;
+  const showPanel = mode !== 'plain' && open && (trimmed.length > 0 || showOnEmpty);
+  // Dòng cuối "Xem tất cả" chỉ có khi đã gõ gì đó, và cũng chọn được bằng phím
+  // mũi tên. Dòng bị ẩn thì không được tính, không thì ↓ dừng ở một dòng vô hình.
+  const hasSeeAll = seeAll && trimmed.length > 0;
+  const optionCount = suggestions.length + (hasSeeAll ? 1 : 0);
 
   useEffect(() => setActive(-1), [deferred]);
 
@@ -171,7 +185,7 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (composing.current || e.nativeEvent.isComposing || e.keyCode === 229) return;
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      if (!trimmed || mode === 'plain') return;
+      if (mode === 'plain' || (!trimmed && !showOnEmpty) || optionCount === 0) return;
       e.preventDefault();
       setOpen(true);
       const step = e.key === 'ArrowDown' ? 1 : -1;
@@ -232,6 +246,7 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
     open: () => setOpen(true),
     close,
     showPanel,
+    seeAll: hasSeeAll,
     suggestions,
     active,
     setActive,

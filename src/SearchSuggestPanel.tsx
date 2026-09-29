@@ -60,10 +60,11 @@ export function SearchSuggestPanel<T extends SearchItem>({
 }: SearchSuggestPanelProps<T>) {
   const l = { ...DEFAULT_SUGGEST_LABELS, ...labels };
   const { suggestions, active, setActive, choose, submit, trimmed, listId, optionId } = state;
+  const showSeeAll = state.seeAll && !hideSeeAll;
 
   return (
     <div className={`cs-suggest cs-suggest--${placement}`} id={listId} role="listbox" aria-label={l.listbox}>
-      {suggestions.length === 0 && <div className="cs-suggest-empty">{l.empty(trimmed)}</div>}
+      {suggestions.length === 0 && trimmed && <div className="cs-suggest-empty">{l.empty(trimmed)}</div>}
 
       {suggestions.map((item, i) => {
         const showGroup = item.group && item.group !== suggestions[i - 1]?.group;
@@ -103,7 +104,7 @@ export function SearchSuggestPanel<T extends SearchItem>({
         );
       })}
 
-      {!hideSeeAll && (
+      {showSeeAll && (
         <div
           id={optionId(suggestions.length)}
           role="option"

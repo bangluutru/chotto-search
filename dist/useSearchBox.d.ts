@@ -39,6 +39,16 @@ export interface UseSearchBoxOptions<T extends SearchItem = SearchItem> {
     /** Từ khoá ban đầu (ví dụ đọc từ `?q=` khi vừa mở trang). */
     initialQuery?: string;
     /**
+     * Hiện bảng gợi ý cả khi ô còn trống (bảng lệnh ⌘K: mở ra là thấy danh
+     * sách). Khi đó `search` được gọi với chuỗi rỗng.
+     */
+    showOnEmpty?: boolean;
+    /**
+     * Có dòng cuối "Xem tất cả" không. Mặc định có. Tắt thì phím ↑/↓ cũng không
+     * dừng ở dòng đó nữa (SearchBox tự tắt khi có `hideSeeAll`).
+     */
+    seeAll?: boolean;
+    /**
      * Đổi giá trị này (thường là pathname) thì ô tự đóng và xoá. Hook không
      * phụ thuộc router nào — mỗi app tự truyền.
      */
@@ -61,6 +71,7 @@ export declare function useSearchBox<T extends SearchItem = SearchItem>(opts?: U
     open: () => void;
     close: () => void;
     showPanel: boolean;
+    seeAll: boolean;
     suggestions: T[];
     active: number;
     setActive: import("react").Dispatch<import("react").SetStateAction<number>>;

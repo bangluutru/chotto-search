@@ -37,7 +37,17 @@ export function SearchBoxView({ state, ariaLabel, placeholder, labels, size = 'm
  *   <SearchBox ariaLabel="Tìm bài viết" search={find} onChoose={(i) => navigate(i.href)} />
  */
 export function SearchBox(props) {
-    const { mode, search, onChoose, onSubmit, onQueryChange, initialQuery, resetKey, ...view } = props;
-    const state = useSearchBox({ mode, search, onChoose, onSubmit, onQueryChange, initialQuery, resetKey });
+    const { mode, search, onChoose, onSubmit, onQueryChange, initialQuery, resetKey, showOnEmpty, seeAll, ...view } = props;
+    const state = useSearchBox({
+        mode,
+        search,
+        onChoose,
+        onSubmit,
+        onQueryChange,
+        initialQuery,
+        resetKey,
+        showOnEmpty,
+        seeAll: seeAll ?? !view.hideSeeAll,
+    });
     return _jsx(SearchBoxView, { state: state, ...view });
 }

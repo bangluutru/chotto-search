@@ -21,7 +21,8 @@ function Icon({ icon }) {
 export function SearchSuggestPanel({ state, placement = 'stretch', labels, renderItem, hideSeeAll = false, }) {
     const l = { ...DEFAULT_SUGGEST_LABELS, ...labels };
     const { suggestions, active, setActive, choose, submit, trimmed, listId, optionId } = state;
-    return (_jsxs("div", { className: `cs-suggest cs-suggest--${placement}`, id: listId, role: "listbox", "aria-label": l.listbox, children: [suggestions.length === 0 && _jsx("div", { className: "cs-suggest-empty", children: l.empty(trimmed) }), suggestions.map((item, i) => {
+    const showSeeAll = state.seeAll && !hideSeeAll;
+    return (_jsxs("div", { className: `cs-suggest cs-suggest--${placement}`, id: listId, role: "listbox", "aria-label": l.listbox, children: [suggestions.length === 0 && trimmed && _jsx("div", { className: "cs-suggest-empty", children: l.empty(trimmed) }), suggestions.map((item, i) => {
                 const showGroup = item.group && item.group !== suggestions[i - 1]?.group;
                 const isActive = active === i;
                 return (_jsxs("div", { className: "cs-suggest-row", children: [showGroup && (_jsx("div", { className: "cs-suggest-group", "aria-hidden": "true", children: item.group })), _jsx("div", { id: optionId(i), role: "option", "aria-selected": isActive, className: `cs-suggest-item${isActive ? ' is-active' : ''}`, 
@@ -30,7 +31,7 @@ export function SearchSuggestPanel({ state, placement = 'stretch', labels, rende
                                 e.preventDefault();
                                 choose(item);
                             }, onMouseEnter: () => setActive(i), children: renderItem ? (renderItem(item, { active: isActive })) : (_jsxs(_Fragment, { children: [_jsx(Icon, { icon: item.icon }), _jsxs("span", { className: "cs-suggest-text", children: [_jsx("span", { className: "cs-suggest-title", children: item.title }), item.subtitle && _jsx("span", { className: "cs-suggest-sub", children: item.subtitle })] })] })) })] }, item.key));
-            }), !hideSeeAll && (_jsxs("div", { id: optionId(suggestions.length), role: "option", "aria-selected": active === suggestions.length, className: `cs-suggest-all${active === suggestions.length ? ' is-active' : ''}`, onMouseDown: (e) => {
+            }), showSeeAll && (_jsxs("div", { id: optionId(suggestions.length), role: "option", "aria-selected": active === suggestions.length, className: `cs-suggest-all${active === suggestions.length ? ' is-active' : ''}`, onMouseDown: (e) => {
                     e.preventDefault();
                     submit();
                 }, onMouseEnter: () => setActive(suggestions.length), children: [_jsx(SearchGlyph, { size: 14 }), _jsx("span", { children: l.seeAll(trimmed) })] }))] }));

@@ -10,7 +10,7 @@ import { useCallback, useDeferredValue, useEffect, useId, useMemo, useRef, useSt
  * `onSubmit`/`onQueryChange`.
  */
 export function useSearchBox(opts = {}) {
-    const { mode = 'suggest', search, onChoose, onSubmit, onQueryChange, initialQuery = '', resetKey, } = opts;
+    const { mode = 'suggest', search, onChoose, onSubmit, onQueryChange, initialQuery = '', resetKey, showOnEmpty = false, seeAll = true, } = opts;
     const listId = useId();
     const containerRef = useRef(null);
     const inputRef = useRef(null);
@@ -30,10 +30,12 @@ export function useSearchBox(opts = {}) {
     const trimmed = query.trim();
     // Gõ nhanh thì React bỏ qua các lần tính giữa chừng; ô nhập không khựng.
     const deferred = useDeferredValue(trimmed);
-    const suggestions = useMemo(() => (mode !== 'plain' && deferred && search ? search(deferred) : []), [mode, deferred, search]);
-    const showPanel = mode !== 'plain' && open && trimmed.length > 0;
-    // Dòng cuối "Xem tất cả" cũng chọn được bằng phím mũi tên.
-    const optionCount = suggestions.length + 1;
+    const suggestions = useMemo(() => (mode !== 'plain' && search && (deferred || showOnEmpty) ? search(deferred) : []), [mode, deferred, search, showOnEmpty]);
+    const showPanel = mode !== 'plain' && open && (trimmed.length > 0 || showOnEmpty);
+    // Dòng cuối "Xem tất cả" chỉ có khi đã gõ gì đó, và cũng chọn được bằng phím
+    // mũi tên. Dòng bị ẩn thì không được tính, không thì ↓ dừng ở một dòng vô hình.
+    const hasSeeAll = seeAll && trimmed.length > 0;
+    const optionCount = suggestions.length + (hasSeeAll ? 1 : 0);
     useEffect(() => setActive(-1), [deferred]);
     // Chuyển trang (resetKey đổi) thì đóng bảng và xoá ô. So với giá trị trước
     // chứ không dùng cờ "lần đầu": StrictMode chạy hiệu ứng hai lần, cờ bị tắt
@@ -94,7 +96,7 @@ export function useSearchBox(opts = {}) {
         if (composing.current || e.nativeEvent.isComposing || e.keyCode === 229)
             return;
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-            if (!trimmed || mode === 'plain')
+            if (mode === 'plain' || (!trimmed && !showOnEmpty) || optionCount === 0)
                 return;
             e.preventDefault();
             setOpen(true);
@@ -158,6 +160,7 @@ export function useSearchBox(opts = {}) {
         open: () => setOpen(true),
         close,
         showPanel,
+        seeAll: hasSeeAll,
         suggestions,
         active,
         setActive,

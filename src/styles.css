@@ -56,9 +56,9 @@
   box-shadow: var(--_shadow), var(--_ring);
 }
 
-.cs-input,
-.cs-input:focus,
-.cs-input:focus-visible {
+.cs-box .cs-input,
+.cs-box .cs-input:focus,
+.cs-box .cs-input:focus-visible {
   outline: none !important;
   box-shadow: none !important;
   border: 0 !important;
@@ -80,6 +80,11 @@
   color: var(--_text);
   font: inherit;
   font-size: var(--cs-font-size, 14.5px);
+}
+
+/* Hai lớp: Tailwind preflight đặt [type=search] { appearance: textfield } và
+   có thể nằm sau file này trong bundle; cùng độ ưu tiên thì nó thắng. */
+.cs-box .cs-input {
   -webkit-appearance: none;
   appearance: none;
 }
@@ -96,8 +101,8 @@
 .cs-input::placeholder { color: var(--_placeholder); }
 
 /* Có nút × riêng: bỏ nút × của trình duyệt, không thì hiện hai nút xoá. */
-.cs-input::-webkit-search-cancel-button,
-.cs-input::-webkit-search-decoration {
+.cs-box .cs-input::-webkit-search-cancel-button,
+.cs-box .cs-input::-webkit-search-decoration {
   -webkit-appearance: none;
   appearance: none;
 }

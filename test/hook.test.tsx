@@ -171,6 +171,36 @@ describe('resetKey', () => {
   });
 });
 
+describe('hideSeeAll / seeAll', () => {
+  it('↓ không dừng ở dòng "Xem tất cả" đã ẩn', () => {
+    const { input, type, key } = setup({ hideSeeAll: true });
+    type('visa'); // 2 gợi ý
+    key('ArrowDown');
+    key('ArrowDown');
+    key('ArrowDown'); // qua dòng cuối → về -1, không dừng ở chỉ số 2
+    expect(input.getAttribute('aria-activedescendant')).toBeNull();
+    expect(screen.queryByText(/Xem tất cả/)).toBeNull();
+  });
+});
+
+describe('showOnEmpty', () => {
+  it('ô trống vẫn hiện danh sách khi focus; ↓ chọn được', () => {
+    const all = (q: string) => (q ? find(q) : DATA);
+    render(<SearchBox ariaLabel="E" search={all} showOnEmpty mode="filter" hideSeeAll />);
+    const input = screen.getByLabelText('E') as HTMLInputElement;
+    act(() => fireEvent.focus(input));
+    expect(screen.getAllByRole('option')).toHaveLength(3);
+    act(() => fireEvent.keyDown(input, { key: 'ArrowDown' }));
+    expect(input.getAttribute('aria-activedescendant')).toMatch(/-opt-0$/);
+  });
+
+  it('mặc định ô trống không hiện bảng', () => {
+    const { input } = setup();
+    act(() => fireEvent.focus(input));
+    expect(screen.queryByRole('listbox')).toBeNull();
+  });
+});
+
 describe('StrictMode', () => {
   it('không xoá initialQuery khi hiệu ứng chạy hai lần', () => {
     render(
