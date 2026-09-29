@@ -30,7 +30,7 @@ những việc đó, có chủ ý, trong `onSubmit`/`onChoose`/`onQueryChange`.
 Repo công khai, `dist/` commit sẵn nên không cần bước build khi cài:
 
 ```bash
-npm install github:bangluutru/chotto-search#v1.2.0
+npm install github:bangluutru/chotto-search#v1.3.0
 ```
 
 Nâng phiên bản: đổi tag trong `package.json` của app.
@@ -101,6 +101,13 @@ const state = useSearchBox({
   <Preview item={state.suggestions[state.active]} />
 </div>
 ```
+
+Ghi chú cho bảng lệnh:
+- Bảng đặt ngoài ô (`hidePanel`) vẫn ăn màu `--cs-*`, không cần bọc `.cs-box`.
+- `keepOpenOnSubmit`: Enter chưa chọn dòng nào vẫn giữ bảng mở.
+- Dòng đang chọn tự cuộn vào khung nhìn; danh sách ngắn lại thì dòng chọn được kéo về.
+- Dòng chọn bằng `onMouseDown`. Nút con trong `renderItem` (ví dụ "Ôn tập") phải
+  `e.stopPropagation()` ở `onMouseDown`, không thì bấm nút cũng là chọn dòng.
 
 Chữ giao diện mặc định là tiếng Việt; site ngôn ngữ khác truyền `labels`:
 

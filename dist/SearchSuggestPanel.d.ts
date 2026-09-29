@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import type { SearchBoxState, SearchItem } from './useSearchBox.js';
 export type PanelPlacement = 'stretch' | 'right' | 'inline';
 export interface SuggestLabels {

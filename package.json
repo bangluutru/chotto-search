@@ -1,6 +1,6 @@
 {
   "name": "@chotto/search",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Ô tìm kiếm dùng chung (SOT) cho mọi site Chotto: so khớp không dấu/kana/romaji, gợi ý theo từng phím gõ, bàn phím và ARIA.",
   "license": "MIT",
   "type": "module",

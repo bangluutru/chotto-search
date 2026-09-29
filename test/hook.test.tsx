@@ -271,6 +271,45 @@ describe('v1.2: bảng lệnh', () => {
   });
 });
 
+describe('v1.3', () => {
+  it('danh sách ngắn lại (đổi bộ lọc) thì dòng đang chọn được kéo về', () => {
+    function Box({ n }: { n: number }) {
+      return <SearchBox ariaLabel="C" search={(q) => find(q).slice(0, n)} hideSeeAll onChoose={() => {}} />;
+    }
+    const { rerender } = render(<Box n={2} />);
+    const input = screen.getByLabelText('C') as HTMLInputElement;
+    act(() => fireEvent.change(input, { target: { value: 'visa' } }));
+    act(() => fireEvent.keyDown(input, { key: 'ArrowDown' }));
+    act(() => fireEvent.keyDown(input, { key: 'ArrowDown' }));
+    expect(input.getAttribute('aria-activedescendant')).toMatch(/-opt-1$/);
+    rerender(<Box n={1} />);
+    expect(input.getAttribute('aria-activedescendant')).toBeNull();
+  });
+
+  it('keepOpenOnSubmit: Enter không chọn dòng nào vẫn để bảng mở', () => {
+    const { enter, type, onSubmit } = setup({ mode: 'filter', keepOpenOnSubmit: true });
+    type('visa');
+    enter();
+    expect(onSubmit).toHaveBeenCalledWith('visa');
+    expect(screen.getByRole('listbox')).toBeTruthy();
+  });
+
+  it('không có kết quả thì báo qua role=status', () => {
+    const { type } = setup();
+    type('zzz');
+    expect(screen.getByRole('status').textContent).toMatch(/Chưa thấy/);
+  });
+
+  it('dòng đang chọn được cuộn vào khung nhìn', () => {
+    const spy = vi.fn();
+    Element.prototype.scrollIntoView = spy;
+    const { type, key } = setup();
+    type('visa');
+    key('ArrowDown');
+    expect(spy).toHaveBeenCalledWith({ block: 'nearest' });
+  });
+});
+
 describe('StrictMode', () => {
   it('không xoá initialQuery khi hiệu ứng chạy hai lần', () => {
     render(

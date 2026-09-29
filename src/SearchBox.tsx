@@ -169,6 +169,7 @@ export function SearchBox<T extends SearchItem = SearchItem>(props: SearchBoxPro
     activateFirst,
     boundaryRef,
     onKeyDown,
+    keepOpenOnSubmit,
     ...view
   } = props;
   const state = useSearchBox<T>({
@@ -184,6 +185,7 @@ export function SearchBox<T extends SearchItem = SearchItem>(props: SearchBoxPro
     activateFirst,
     boundaryRef,
     onKeyDown,
+    keepOpenOnSubmit,
   });
   return <SearchBoxView state={state} {...view} />;
 }

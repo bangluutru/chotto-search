@@ -1,5 +1,6 @@
 'use client';
 import { Fragment as _Fragment, jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
+import { useEffect } from 'react';
 import { SearchGlyph } from './SearchGlyph.js';
 export const DEFAULT_SUGGEST_LABELS = {
     listbox: 'Gợi ý tìm kiếm',
@@ -23,7 +24,14 @@ export function SearchSuggestPanel({ state, placement = 'stretch', labels, rende
     const l = { ...DEFAULT_SUGGEST_LABELS, ...labels };
     const { suggestions, active, setActive, choose, submit, trimmed, listId, optionId } = state;
     const showSeeAll = state.seeAll && !hideSeeAll;
-    return (_jsxs("div", { className: `cs-suggest cs-suggest--${placement}`, id: listId, role: "listbox", "aria-label": l.listbox, children: [suggestions.length === 0 && trimmed && _jsx("div", { className: "cs-suggest-empty", children: l.empty(trimmed) }), suggestions.map((item, i) => {
+    // Dòng đang chọn bằng phím luôn nằm trong khung nhìn của danh sách dài.
+    useEffect(() => {
+        if (active < 0)
+            return;
+        const el = typeof document !== 'undefined' ? document.getElementById(optionId(active)) : null;
+        el?.scrollIntoView?.({ block: 'nearest' });
+    }, [active, listId]); // optionId là hàm mới mỗi lần render; listId thì cố định
+    return (_jsxs("div", { className: `cs-suggest cs-suggest--${placement}`, id: listId, role: "listbox", "aria-label": l.listbox, children: [suggestions.length === 0 && trimmed && _jsx("div", { className: "cs-suggest-empty", role: "status", children: l.empty(trimmed) }), suggestions.map((item, i) => {
                 const showGroup = item.group && item.group !== suggestions[i - 1]?.group;
                 const isActive = active === i;
                 return (_jsxs("div", { className: "cs-suggest-row", children: [showGroup && (_jsx("div", { className: "cs-suggest-group", "aria-hidden": "true", children: l.group(item.group, suggestions.filter((s) => s.group === item.group)) })), _jsx("div", { id: optionId(i), role: "option", "aria-selected": isActive, className: `cs-suggest-item${isActive ? ' is-active' : ''}`, 

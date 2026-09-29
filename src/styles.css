@@ -4,7 +4,7 @@
  * Mỗi app ánh xạ các biến --cs-* sang token của mình (xem README). Giá trị
  * mặc định dưới đây là bảng màu của chottoday.com.
  */
-.cs-box {
+:where(.cs-box, .cs-suggest) {
   --_surface: var(--cs-surface, #ffffff);
   --_hover: var(--cs-hover, #f4f1ea);
   --_border: var(--cs-border, #e6e2d9);
@@ -21,7 +21,9 @@
   --_button-bg-hover: var(--cs-button-bg-hover, #236a70);
   --_button-text: var(--cs-button-text, #ffffff);
   --_font: var(--cs-font, inherit);
+}
 
+.cs-box {
   position: relative;
   width: 100%;
   min-width: 0;
@@ -159,6 +161,7 @@
 /* ---- Bảng gợi ý ---------------------------------------------------------- */
 
 .cs-suggest {
+  font-family: var(--_font);
   position: absolute;
   top: calc(100% + 8px);
   z-index: 60;

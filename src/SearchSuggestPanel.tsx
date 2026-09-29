@@ -1,5 +1,5 @@
 'use client';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import type { SearchBoxState, SearchItem } from './useSearchBox.js';
 import { SearchGlyph } from './SearchGlyph.js';
 
@@ -65,9 +65,16 @@ export function SearchSuggestPanel<T extends SearchItem>({
   const { suggestions, active, setActive, choose, submit, trimmed, listId, optionId } = state;
   const showSeeAll = state.seeAll && !hideSeeAll;
 
+  // Dòng đang chọn bằng phím luôn nằm trong khung nhìn của danh sách dài.
+  useEffect(() => {
+    if (active < 0) return;
+    const el = typeof document !== 'undefined' ? document.getElementById(optionId(active)) : null;
+    el?.scrollIntoView?.({ block: 'nearest' });
+  }, [active, listId]); // optionId là hàm mới mỗi lần render; listId thì cố định
+
   return (
     <div className={`cs-suggest cs-suggest--${placement}`} id={listId} role="listbox" aria-label={l.listbox}>
-      {suggestions.length === 0 && trimmed && <div className="cs-suggest-empty">{l.empty(trimmed)}</div>}
+      {suggestions.length === 0 && trimmed && <div className="cs-suggest-empty" role="status">{l.empty(trimmed)}</div>}
 
       {suggestions.map((item, i) => {
         const showGroup = item.group && item.group !== suggestions[i - 1]?.group;

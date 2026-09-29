@@ -63,6 +63,11 @@ export interface UseSearchBoxOptions<T extends SearchItem = SearchItem> {
      * Phím riêng của app, chạy TRƯỚC xử lý của gói. Gọi `e.preventDefault()` thì
      * gói bỏ qua phím đó. Ví dụ ⌘/Ctrl+Enter trên dòng `state.active`.
      */
+    /**
+     * Enter mà chưa chọn dòng nào: vẫn để bảng mở sau `onSubmit` (bảng lệnh,
+     * danh sách là nội dung chính). Mặc định đóng.
+     */
+    keepOpenOnSubmit?: boolean;
     onKeyDown?: (e: KeyboardEvent<HTMLInputElement>, ctx: {
         active: T | null;
         query: string;

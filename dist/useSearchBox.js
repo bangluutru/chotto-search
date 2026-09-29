@@ -10,7 +10,7 @@ import { useCallback, useDeferredValue, useEffect, useId, useMemo, useRef, useSt
  * `onSubmit`/`onQueryChange`.
  */
 export function useSearchBox(opts = {}) {
-    const { mode = 'suggest', search, onChoose, onSubmit, onQueryChange, initialQuery = '', resetKey, showOnEmpty = false, seeAll = true, activateFirst = false, boundaryRef, } = opts;
+    const { mode = 'suggest', search, onChoose, onSubmit, onQueryChange, initialQuery = '', resetKey, showOnEmpty = false, seeAll = true, activateFirst = false, boundaryRef, keepOpenOnSubmit = false, } = opts;
     const listId = useId();
     const containerRef = useRef(null);
     const inputRef = useRef(null);
@@ -40,6 +40,11 @@ export function useSearchBox(opts = {}) {
     // viết thẳng trong JSX thì mảng mới mỗi lần render, và ↓ bị xoá ngay sau khi bấm.
     const hasSuggestions = suggestions.length > 0;
     useEffect(() => setActive(activateFirst && hasSuggestions ? 0 : -1), [deferred, activateFirst, hasSuggestions]);
+    // Danh sách ngắn lại mà từ khoá giữ nguyên (đổi bộ lọc): kéo dòng đang chọn về
+    // trong danh sách, không thì Enter rơi vào "Xem tất cả"/chỗ trống.
+    useEffect(() => {
+        setActive((i) => (i >= optionCount ? (activateFirst && optionCount > 0 ? 0 : -1) : i));
+    }, [optionCount, activateFirst]);
     // Chuyển trang (resetKey đổi) thì đóng bảng và xoá ô. So với giá trị trước
     // chứ không dùng cờ "lần đầu": StrictMode chạy hiệu ứng hai lần, cờ bị tắt
     // ở lần một và lần hai xoá mất từ khoá ban đầu (?q= trên trang kết quả).
@@ -71,6 +76,10 @@ export function useSearchBox(opts = {}) {
     const submit = useCallback(() => {
         if (!trimmed)
             return;
+        if (keepOpenOnSubmit) {
+            cb.current.onSubmit?.(trimmed);
+            return;
+        }
         close();
         cb.current.onSubmit?.(trimmed);
         // Chỉ ô `suggest` rời trang sau Enter nên mới xoá. Ô `filter` đang lọc
@@ -80,7 +89,7 @@ export function useSearchBox(opts = {}) {
             return;
         setQuery('');
         inputRef.current?.blur();
-    }, [trimmed, mode, close, setQuery]);
+    }, [trimmed, mode, close, setQuery, keepOpenOnSubmit]);
     const choose = useCallback((item) => {
         close();
         if (mode === 'suggest')
