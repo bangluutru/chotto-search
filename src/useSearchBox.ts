@@ -37,7 +37,8 @@ export interface SearchItem {
  *   (thường là mở trang kết quả), ô được xoá.
  * - `filter`: ô lọc danh sách ngay bên dưới; từ khoá được giữ, Enter không
  *   chọn gợi ý chỉ đóng bảng.
- * - `plain`: không có bảng gợi ý (trang kết quả đã tự hiện kết quả).
+ * - `plain`: không có bảng gợi ý (trang kết quả đã tự hiện kết quả); từ
+ *   khoá được giữ.
  */
 export type SearchMode = 'suggest' | 'filter' | 'plain';
 
@@ -141,12 +142,11 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
   const submit = useCallback(() => {
     if (!trimmed) return;
     close();
-    if (mode === 'filter') {
-      // Lưới bên dưới đã lọc theo đúng từ khoá; chỉ đóng bảng.
-      cb.current.onSubmit?.(trimmed);
-      return;
-    }
     cb.current.onSubmit?.(trimmed);
+    // Chỉ ô `suggest` rời trang sau Enter nên mới xoá. Ô `filter` đang lọc
+    // lưới bên dưới, ô `plain` nằm ngay trên trang kết quả: xoá là mất từ khoá
+    // người đọc vừa gõ.
+    if (mode !== 'suggest') return;
     setQuery('');
     inputRef.current?.blur();
   }, [trimmed, mode, close, setQuery]);
@@ -154,7 +154,7 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
   const choose = useCallback(
     (item: T) => {
       close();
-      if (mode !== 'filter') setQuery('');
+      if (mode === 'suggest') setQuery('');
       inputRef.current?.blur();
       if (cb.current.onChoose) {
         cb.current.onChoose(item);

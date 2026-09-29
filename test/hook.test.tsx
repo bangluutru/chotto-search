@@ -133,6 +133,14 @@ describe('SearchBox — filter', () => {
 });
 
 describe('SearchBox — plain', () => {
+  it('Enter gửi từ khoá và giữ nguyên trong ô', () => {
+    const { input, type, enter, onSubmit } = setup({ mode: 'plain' });
+    type('visa');
+    enter();
+    expect(onSubmit).toHaveBeenCalledWith('visa');
+    expect(input.value).toBe('visa');
+  });
+
   it('không có bảng gợi ý, không role combobox', () => {
     const { input, type } = setup({ mode: 'plain' });
     type('visa');

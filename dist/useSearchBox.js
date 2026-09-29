@@ -63,18 +63,18 @@ export function useSearchBox(opts = {}) {
         if (!trimmed)
             return;
         close();
-        if (mode === 'filter') {
-            // Lưới bên dưới đã lọc theo đúng từ khoá; chỉ đóng bảng.
-            cb.current.onSubmit?.(trimmed);
-            return;
-        }
         cb.current.onSubmit?.(trimmed);
+        // Chỉ ô `suggest` rời trang sau Enter nên mới xoá. Ô `filter` đang lọc
+        // lưới bên dưới, ô `plain` nằm ngay trên trang kết quả: xoá là mất từ khoá
+        // người đọc vừa gõ.
+        if (mode !== 'suggest')
+            return;
         setQuery('');
         inputRef.current?.blur();
     }, [trimmed, mode, close, setQuery]);
     const choose = useCallback((item) => {
         close();
-        if (mode !== 'filter')
+        if (mode === 'suggest')
             setQuery('');
         inputRef.current?.blur();
         if (cb.current.onChoose) {

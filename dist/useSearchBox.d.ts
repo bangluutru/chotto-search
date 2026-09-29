@@ -22,7 +22,8 @@ export interface SearchItem {
  *   (thường là mở trang kết quả), ô được xoá.
  * - `filter`: ô lọc danh sách ngay bên dưới; từ khoá được giữ, Enter không
  *   chọn gợi ý chỉ đóng bảng.
- * - `plain`: không có bảng gợi ý (trang kết quả đã tự hiện kết quả).
+ * - `plain`: không có bảng gợi ý (trang kết quả đã tự hiện kết quả); từ
+ *   khoá được giữ.
  */
 export type SearchMode = 'suggest' | 'filter' | 'plain';
 export interface UseSearchBoxOptions<T extends SearchItem = SearchItem> {

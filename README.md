@@ -30,7 +30,7 @@ những việc đó, có chủ ý, trong `onSubmit`/`onChoose`/`onQueryChange`.
 Repo công khai, `dist/` commit sẵn nên không cần bước build khi cài:
 
 ```bash
-npm install github:bangluutru/chotto-search#v1.0.0
+npm install github:bangluutru/chotto-search#v1.0.1
 ```
 
 Nâng phiên bản: đổi tag trong `package.json` của app.
@@ -65,7 +65,7 @@ Ba chế độ (`mode`):
 | --- | --- | --- |
 | `suggest` (mặc định) | Ô tìm chung: navbar, trang chủ | `onSubmit`, ô được xoá |
 | `filter` | Ô lọc danh sách ngay bên dưới | `onSubmit`, **từ khoá giữ lại** |
-| `plain` | Trang kết quả đã tự hiện kết quả | `onSubmit`, không có bảng gợi ý |
+| `plain` | Trang kết quả đã tự hiện kết quả | `onSubmit`, từ khoá giữ lại, không có bảng gợi ý |
 
 Trang cần giữ state (chip điền từ khoá, lọc lưới) thì tách hai phần:
 
