@@ -91,6 +91,17 @@ describe('SearchBox — suggest', () => {
     expect(screen.queryByRole('listbox')).toBeNull();
   });
 
+  it('bấm ra ngoài bỏ dòng đang chọn: quay lại Enter không mở gợi ý cũ', () => {
+    const { input, type, key, enter, onChoose, onSubmit } = setup();
+    type('visa');
+    key('ArrowDown');
+    act(() => fireEvent.pointerDown(document.body));
+    act(() => fireEvent.focus(input));
+    enter();
+    expect(onChoose).not.toHaveBeenCalled();
+    expect(onSubmit).toHaveBeenCalledWith('visa');
+  });
+
   it('không có kết quả thì nói rõ', () => {
     const { type } = setup();
     type('zzz');

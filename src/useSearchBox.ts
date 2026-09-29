@@ -125,19 +125,21 @@ export function useSearchBox<T extends SearchItem = SearchItem>(opts: UseSearchB
     setQuery('');
   }, [resetKey, setQuery]);
 
-  useEffect(() => {
-    if (!showPanel) return undefined;
-    const onPointerDown = (e: PointerEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('pointerdown', onPointerDown);
-    return () => document.removeEventListener('pointerdown', onPointerDown);
-  }, [showPanel]);
-
   const close = useCallback(() => {
     setOpen(false);
     setActive(-1);
   }, []);
+
+  // Bấm ra ngoài thì đóng VÀ bỏ dòng đang chọn. Chỉ đóng thôi thì dòng cũ còn
+  // nhớ: bấm lại vào ô rồi Enter là mở gợi ý người đọc không chọn lại.
+  useEffect(() => {
+    if (!showPanel) return undefined;
+    const onPointerDown = (e: PointerEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) close();
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [showPanel, close]);
 
   const submit = useCallback(() => {
     if (!trimmed) return;

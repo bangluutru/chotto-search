@@ -30,7 +30,7 @@ những việc đó, có chủ ý, trong `onSubmit`/`onChoose`/`onQueryChange`.
 Repo công khai, `dist/` commit sẵn nên không cần bước build khi cài:
 
 ```bash
-npm install github:bangluutru/chotto-search#v1.0.2
+npm install github:bangluutru/chotto-search#v1.0.3
 ```
 
 Nâng phiên bản: đổi tag trong `package.json` của app.
@@ -105,6 +105,10 @@ Map biến `--cs-*` sang token của app, một lần, ở CSS toàn cục:
 `--cs-panel-shadow`, `--cs-radius-panel`, `--cs-radius-item`, `--cs-button-bg`,
 `--cs-button-bg-hover`, `--cs-button-text`, `--cs-font`, `--cs-height`.
 Chế độ tối: đổi token của app, các biến ăn theo.
+
+Muốn bỏ bóng thì đặt `--cs-shadow: 0 0 transparent`, **đừng** đặt `none`: gói
+ghép `var(--cs-shadow), var(--cs-focus-ring)` khi focus, mà `none, …` là CSS
+sai — trình duyệt bỏ cả dòng và mất luôn vòng focus.
 
 Gói chỉ dùng class `cs-*` có sẵn trong `styles.css`, nên site dùng Tailwind
 không cần thêm gói vào `content`.
